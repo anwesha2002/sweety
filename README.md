@@ -2,6 +2,19 @@
 
 Sweety is a blood glucose tracking app: a diabetes patient records up to 4 readings a day and reviews daily and monthly reports.
 
+## How it looks
+
+<img width="1917" height="912" alt="Screenshot 2026-11-06 080113" src="https://github.com/user-attachments/assets/a4e0d2a0-e6ba-4429-98a9-f0ebe65cfdbe" />
+<img width="1916" height="912" alt="Screenshot 2026-11-06 080130" src="https://github.com/user-attachments/assets/e485114e-f5e3-49d2-a149-bd09528b1146" />
+<img width="1917" height="907" alt="Screenshot 2026-11-06 081023" src="https://github.com/user-attachments/assets/47323548-4aff-4e9e-bd07-b008e4dc9301" />
+<img width="1915" height="910" alt="Screenshot 2026-11-06 080155" src="https://github.com/user-attachments/assets/82327923-b0ad-44d9-b153-9e397c89bbb7" />
+<img width="1916" height="907" alt="Screenshot 2026-11-06 080214" src="https://github.com/user-attachments/assets/f24c080a-3dcc-423e-8d7b-3812d76654ee" />
+<img width="1905" height="897" alt="Screenshot 2026-11-06 080233" src="https://github.com/user-attachments/assets/9de7a8a8-f35b-4790-a011-d43f2a1ab3db" />
+<img width="1916" height="910" alt="Screenshot 2026-11-06 080252" src="https://github.com/user-attachments/assets/0434388e-822c-4958-97dc-ff3473f2cdd8" />
+<img width="1920" height="2165" alt="screencapture-sweetyy-anwesha2002-vercel-app-reports-2026-11-06-08_04_29" src="https://github.com/user-attachments/assets/4fbea6b0-76ef-40fb-a7a7-e056ba312f21" />
+<img width="1897" height="910" alt="Screenshot 2026-11-06 080542" src="https://github.com/user-attachments/assets/22a977eb-4032-4ea6-8d19-d36c1941169a" />
+
+
 ## What is implemented
 
 - Monorepo (npm workspaces): `client` (React) and `server` (Express), each with its own dependencies.
@@ -141,3 +154,4 @@ Request and response examples: [docs/api.md](docs/api.md).
 
 - Redis for caching
 - Doctor's role admin dashboard
+- Forget password implementation in case user get locked in their mail
