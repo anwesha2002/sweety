@@ -7,7 +7,13 @@ import type {
   MonthlyReport,
   MonthToDateReport,
   ReportSummary,
+  TrendReport,
 } from './reports.schemas.js';
+
+/** Averages are shown with 1 decimal everywhere. */
+function roundToOneDecimal(value: number): number {
+  return Math.round(value * 10) / 10;
+}
 
 /** The one place that turns database numbers into a summary: all three reports use it. */
 export function buildSummary(aggregate: ReadingsAggregate): ReportSummary {
@@ -18,8 +24,27 @@ export function buildSummary(aggregate: ReadingsAggregate): ReportSummary {
   return {
     highest: aggregate.max,
     lowest: aggregate.min,
-    average: Math.round(aggregate.avg * 10) / 10, // 1 decimal
+    average: roundToOneDecimal(aggregate.avg),
     count: aggregate.count,
+  };
+}
+
+/** The average of each day's readings from `from` to `to`, for the trend chart. */
+export async function getTrendReport(
+  userId: string,
+  from: string,
+  to: string,
+): Promise<TrendReport> {
+  const days = await reportsRepository.averagesByDay(userId, from, to);
+
+  return {
+    from,
+    to,
+    points: days.map((day) => ({
+      date: day.date,
+      average: roundToOneDecimal(day.avg),
+      count: day.count,
+    })),
   };
 }
 

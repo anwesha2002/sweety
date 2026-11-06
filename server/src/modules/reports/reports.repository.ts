@@ -44,6 +44,32 @@ export async function summarizeReadings(
   };
 }
 
+/**
+ * The average value and number of readings for each day that has readings between `from` and
+ * `to` (inclusive), oldest day first. Days without readings do not appear.
+ */
+export async function averagesByDay(
+  userId: string,
+  from: string,
+  to: string,
+): Promise<{ date: string; avg: number; count: number }[]> {
+  const rows = await db
+    .select({ date: glucoseReadings.date, avg: avg(glucoseReadings.value), count: count() })
+    .from(glucoseReadings)
+    .where(
+      and(
+        eq(glucoseReadings.userId, userId),
+        gte(glucoseReadings.date, from),
+        lte(glucoseReadings.date, to),
+      ),
+    )
+    .groupBy(glucoseReadings.date)
+    .orderBy(asc(glucoseReadings.date));
+
+  // AVG comes back from Postgres as a string (an exact decimal).
+  return rows.map((row) => ({ date: row.date, avg: Number(row.avg), count: row.count }));
+}
+
 /** The user's readings for one day, in slot order (Morning first). */
 export function listReadingsOnDate(userId: string, date: string): Promise<GlucoseReading[]> {
   return db

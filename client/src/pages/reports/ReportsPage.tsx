@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { TextField } from '../../components/common/TextField';
 import { ReportCard } from '../../components/reports/ReportCard';
+import { TrendCard } from '../../components/reports/TrendCard';
 import { GLUCOSE_UNIT } from '../../constants/glucose';
 import { useDailyReport, useMonthlyReport, useMonthToDateReport } from '../../hooks/useReports';
 import {
@@ -81,6 +82,9 @@ export function ReportsPage() {
           />
         </div>
       )}
+
+      {/* Has its own period controls (day, month or date range), independent of the date above. */}
+      <TrendCard />
     </div>
   );
 }

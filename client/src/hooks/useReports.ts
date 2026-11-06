@@ -3,6 +3,7 @@ import {
   getDailyReport,
   getMonthlyReport,
   getMonthToDateReport,
+  getTrendReport,
 } from '../services/reports.service';
 import { useAsyncData } from './useAsyncData';
 
@@ -25,5 +26,11 @@ export function useMonthToDateReport(date: string, options: ReportOptions = {}) 
 
 export function useMonthlyReport(date: string, options: ReportOptions = {}) {
   const load = useCallback(() => getMonthlyReport(date), [date]);
+  return useAsyncData(load, { enabled: options.enabled });
+}
+
+/** Daily averages between two dates, for the trend chart. */
+export function useTrendReport(from: string, to: string, options: ReportOptions = {}) {
+  const load = useCallback(() => getTrendReport(from, to), [from, to]);
   return useAsyncData(load, { enabled: options.enabled });
 }

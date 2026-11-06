@@ -217,7 +217,7 @@ Partial update: send any of `date`, `slot`, `value` (at least one, otherwise `40
 
 # Reports
 
-All three take the selected date as `date=YYYY-MM-DD` (required). The client sends its local date. There is no future-date restriction (a future date just gives an empty report).
+The daily, month-to-date and monthly reports take the selected date as `date=YYYY-MM-DD` (required); the trend report takes `from` and `to` instead. The client sends its local date. There is no future-date restriction (a future date just gives an empty report).
 
 ```ts
 interface ReportSummary {
@@ -271,6 +271,41 @@ From the 1st of the month to `date`, both inclusive.
 ```
 
 On the 1st of a month the range is that single day.
+
+## GET /reports/trend?from=2026-11-01&to=2026-11-30
+
+The average of each day's readings between `from` and `to` (both required, both inclusive), for the line chart. One request serves any span: the client sends a single day, a month or a free range as `from`/`to`.
+
+`200`
+
+```json
+{
+  "success": true,
+  "message": "Trend report",
+  "data": {
+    "from": "2026-11-01",
+    "to": "2026-11-30",
+    "points": [
+      { "date": "2026-11-01", "average": 130, "count": 1 },
+      { "date": "2026-11-02", "average": 95, "count": 1 },
+      { "date": "2026-11-06", "average": 127.7, "count": 3 }
+    ]
+  }
+}
+```
+
+- `points` are oldest first. A day without readings has **no** point (the chart leaves a gap rather than inventing a zero), so an empty range gives `"points": []`.
+- `average` is rounded to 1 decimal, `count` is the number of readings that day.
+- The range may span at most **366 days** (counting both end dates).
+
+Errors, all `400`:
+
+| Field  | Message                                        | When                        |
+| ------ | ---------------------------------------------- | --------------------------- |
+| `from` | `Enter a valid date.`                          | missing or not a real date  |
+| `to`   | `Enter a valid date.`                          | missing or not a real date  |
+| `to`   | `End date must be on or after the start date.` | `to` is before `from`       |
+| `to`   | `Choose a range of one year or less.`          | more than 366 days from..to |
 
 ## GET /reports/monthly?date=2026-11-04
 

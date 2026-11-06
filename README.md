@@ -10,6 +10,7 @@ Sweety is a blood glucose tracking app: a diabetes patient records up to 4 readi
 - Express foundation: central error handler with one response format, Zod validation middleware, env validation, Pino logging with redaction, Helmet, CORS, health check, graceful shutdown.
 - **Readings:** create, list (date range and pagination), get, update and delete, with the business rules (value required and 40–600, one reading per slot per day, at most 4 per day, no future dates) and the exact error messages. Users only ever see their own readings.
 - **Reports:** daily (with each reading and its slot), month-to-date and previous-month reports, each with highest, lowest, average (1 decimal) and count, and a friendly empty state.
+- **Glucose trend chart:** a line chart on the Reports page of the average glucose per day, for a single day (each reading through the day), a month, or any date range of up to a year. It is a small hand-written SVG component, so there is no charting dependency.
 - React app: login and register forms (React Hook Form + Zod), protected and guest routes, responsive layout (sidebar, navbar), a dashboard with this month's summary and today's four slots, an add/edit reading dialog, My Readings (filters, pagination, edit, delete with confirmation) and Reports (date picker, three reports).
 - Tests: backend (Vitest + Supertest) for auth, readings, reports and the date helpers; frontend (Vitest + React Testing Library) for the login, reading form, dashboard, reports page and date/form utilities.
 
@@ -103,21 +104,22 @@ Server tests need the test database: before the run they apply the migrations, a
 
 ## API endpoints
 
-| Method | Path                            | Auth                 | Purpose                                          |
-| ------ | ------------------------------- | -------------------- | ------------------------------------------------ |
-| GET    | `/api/v1/health`                | public               | Status and database check                        |
-| POST   | `/api/v1/auth/register`         | public, rate-limited | Create an account and log in                     |
-| POST   | `/api/v1/auth/login`            | public, rate-limited | Log in                                           |
-| POST   | `/api/v1/auth/logout`           | public               | Clear the cookie                                 |
-| GET    | `/api/v1/auth/me`               | required             | Current user                                     |
-| POST   | `/api/v1/readings`              | required             | Add a reading                                    |
-| GET    | `/api/v1/readings`              | required             | List readings (`from`, `to`, `page`, `pageSize`) |
-| GET    | `/api/v1/readings/:id`          | required             | Get one reading                                  |
-| PUT    | `/api/v1/readings/:id`          | required             | Update a reading (partial)                       |
-| DELETE | `/api/v1/readings/:id`          | required             | Delete a reading                                 |
-| GET    | `/api/v1/reports/daily`         | required             | Summary and readings for `date`                  |
-| GET    | `/api/v1/reports/month-to-date` | required             | 1st of the month up to `date`                    |
-| GET    | `/api/v1/reports/monthly`       | required             | The whole month before `date`'s month            |
+| Method | Path                            | Auth                 | Purpose                                           |
+| ------ | ------------------------------- | -------------------- | ------------------------------------------------- |
+| GET    | `/api/v1/health`                | public               | Status and database check                         |
+| POST   | `/api/v1/auth/register`         | public, rate-limited | Create an account and log in                      |
+| POST   | `/api/v1/auth/login`            | public, rate-limited | Log in                                            |
+| POST   | `/api/v1/auth/logout`           | public               | Clear the cookie                                  |
+| GET    | `/api/v1/auth/me`               | required             | Current user                                      |
+| POST   | `/api/v1/readings`              | required             | Add a reading                                     |
+| GET    | `/api/v1/readings`              | required             | List readings (`from`, `to`, `page`, `pageSize`)  |
+| GET    | `/api/v1/readings/:id`          | required             | Get one reading                                   |
+| PUT    | `/api/v1/readings/:id`          | required             | Update a reading (partial)                        |
+| DELETE | `/api/v1/readings/:id`          | required             | Delete a reading                                  |
+| GET    | `/api/v1/reports/daily`         | required             | Summary and readings for `date`                   |
+| GET    | `/api/v1/reports/month-to-date` | required             | 1st of the month up to `date`                     |
+| GET    | `/api/v1/reports/monthly`       | required             | The whole month before `date`'s month             |
+| GET    | `/api/v1/reports/trend`         | required             | Daily averages from `from` to `to` (max 366 days) |
 
 Request and response examples: [docs/api.md](docs/api.md).
 

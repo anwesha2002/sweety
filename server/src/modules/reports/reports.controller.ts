@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'express';
 import { ApiError } from '../../utils/ApiError.js';
 import { sendSuccess } from '../../utils/response.js';
-import type { ReportQuery } from './reports.schemas.js';
+import type { ReportQuery, TrendQuery } from './reports.schemas.js';
 import * as reportsService from './reports.service.js';
 
 // req.query has already been validated by the validate() middleware. The user id always comes
@@ -31,4 +31,10 @@ export const monthToDate: RequestHandler = async (req, res) => {
 export const monthly: RequestHandler = async (req, res) => {
   const report = await reportsService.getMonthlyReport(currentUserId(req), selectedDate(req));
   sendSuccess(res, 'Monthly report', report);
+};
+
+export const trend: RequestHandler = async (req, res) => {
+  const { from, to } = req.query as unknown as TrendQuery;
+  const report = await reportsService.getTrendReport(currentUserId(req), from, to);
+  sendSuccess(res, 'Trend report', report);
 };

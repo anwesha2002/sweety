@@ -32,6 +32,14 @@ export function todayString(now: Date = new Date()): string {
   return formatUtcDate(now);
 }
 
+//daysBetween('2026-11-01', '2026-11-04') -> 3 (negative when `to` is before `from`)
+export function daysBetween(from: string, to: string): number {
+  const MILLISECONDS_PER_DAY = 86_400_000;
+  return Math.round(
+    (parseUtcDate(to).getTime() - parseUtcDate(from).getTime()) / MILLISECONDS_PER_DAY,
+  );
+}
+
 //addDays('2026-11-04', 1)   -> '2026-11-05'
 export function addDays(value: string, days: number): string {
   const date = parseUtcDate(value);

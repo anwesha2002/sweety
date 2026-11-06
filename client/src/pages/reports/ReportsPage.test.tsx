@@ -13,6 +13,10 @@ vi.mock('../../services/reports.service', () => ({
   getMonthToDateReport: vi.fn(),
   getMonthlyReport: vi.fn(),
 }));
+// The chart has its own tests (TrendCard.test.tsx); here it is just a marker.
+vi.mock('../../components/reports/TrendCard', () => ({
+  TrendCard: () => <p>trend chart section</p>,
+}));
 
 const EMPTY = { highest: null, lowest: null, average: null, count: 0 };
 
@@ -101,6 +105,19 @@ describe('ReportsPage', () => {
     expect(await screen.findByText('Choose a date to see your reports.')).toBeInTheDocument();
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
     expect(getDailyReport).not.toHaveBeenCalled();
+  });
+
+  it('includes the glucose trend chart section, also when no date is chosen', async () => {
+    mockEmptyReports();
+    renderWithProviders(<ReportsPage />);
+    await screen.findAllByText('No readings for this period.');
+
+    expect(screen.getByText('trend chart section')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Report date'), { target: { value: '' } });
+
+    expect(await screen.findByText('Choose a date to see your reports.')).toBeInTheDocument();
+    expect(screen.getByText('trend chart section')).toBeInTheDocument();
   });
 
   it('fetches the reports again for a newly chosen date', async () => {

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { app } from '../src/app.js';
 import { registerAndGetCookie } from './helpers/auth.js';
 import { postReading } from './helpers/readings.js';
-import { getReport, type ReportKind } from './helpers/reports.js';
+import { getReport, getTrend, type ReportKind } from './helpers/reports.js';
 
 type Slot = 'MORNING' | 'AFTER_BREAKFAST' | 'AFTER_LUNCH' | 'AFTER_DINNER';
 
@@ -231,5 +231,117 @@ describe('GET /api/v1/reports/monthly', () => {
       average: 100,
       count: 1,
     });
+  });
+});
+
+describe('GET /api/v1/reports/trend', () => {
+  it('returns 401 without authentication', async () => {
+    const response = await request(app).get('/api/v1/reports/trend?from=2025-11-01&to=2025-11-30');
+
+    expect(response.status).toBe(401);
+  });
+
+  it('rejects missing and invalid dates', async () => {
+    const cookie = await registerAndGetCookie();
+
+    const missing = await getTrend(cookie);
+    const impossible = await getTrend(cookie, '2025-02-30', '2025-03-05');
+
+    expect(missing.status).toBe(400);
+    expect(missing.body.errors).toEqual([
+      { field: 'from', message: 'Enter a valid date.' },
+      { field: 'to', message: 'Enter a valid date.' },
+    ]);
+    expect(impossible.status).toBe(400);
+    expect(impossible.body.errors).toEqual([{ field: 'from', message: 'Enter a valid date.' }]);
+  });
+
+  it('rejects an end date before the start date', async () => {
+    const cookie = await registerAndGetCookie();
+
+    const response = await getTrend(cookie, '2025-11-10', '2025-11-01');
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toEqual([
+      { field: 'to', message: 'End date must be on or after the start date.' },
+    ]);
+  });
+
+  it('allows a range of 366 days but not more', async () => {
+    const cookie = await registerAndGetCookie();
+
+    const allowed = await getTrend(cookie, '2024-01-01', '2024-12-31'); // 366 days (leap year)
+    const tooLong = await getTrend(cookie, '2024-01-01', '2025-01-01'); // 367 days
+
+    expect(allowed.status).toBe(200);
+    expect(tooLong.status).toBe(400);
+    expect(tooLong.body.errors).toEqual([
+      { field: 'to', message: 'Choose a range of one year or less.' },
+    ]);
+  });
+
+  it('returns the average of each day, oldest first, leaving out days without readings', async () => {
+    const cookie = await registerAndGetCookie();
+    await seed(cookie, [
+      ['2025-11-04', 'MORNING', 100],
+      ['2025-11-04', 'AFTER_LUNCH', 100],
+      ['2025-11-04', 'AFTER_DINNER', 101], // 100.33.. -> 100.3
+      ['2025-11-01', 'AFTER_LUNCH', 101],
+      ['2025-11-01', 'MORNING', 100], // 100.5
+      ['2025-11-03', 'MORNING', 120],
+    ]);
+
+    const response = await getTrend(cookie, '2025-11-01', '2025-11-05');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toEqual({
+      from: '2025-11-01',
+      to: '2025-11-05',
+      points: [
+        { date: '2025-11-01', average: 100.5, count: 2 },
+        { date: '2025-11-03', average: 120, count: 1 },
+        { date: '2025-11-04', average: 100.3, count: 3 },
+      ],
+    });
+  });
+
+  it('includes both end dates and nothing outside the range', async () => {
+    const cookie = await registerAndGetCookie();
+    await seed(cookie, [
+      ['2025-10-31', 'MORNING', 300], // before
+      ['2025-11-01', 'MORNING', 110], // first day
+      ['2025-11-30', 'MORNING', 130], // last day
+      ['2025-12-01', 'MORNING', 400], // after
+    ]);
+
+    const response = await getTrend(cookie, '2025-11-01', '2025-11-30');
+
+    expect(response.body.data.points).toEqual([
+      { date: '2025-11-01', average: 110, count: 1 },
+      { date: '2025-11-30', average: 130, count: 1 },
+    ]);
+  });
+
+  it('works for a single day', async () => {
+    const cookie = await registerAndGetCookie();
+    await seed(cookie, [
+      ['2025-11-04', 'MORNING', 90],
+      ['2025-11-04', 'AFTER_LUNCH', 110],
+    ]);
+
+    const response = await getTrend(cookie, '2025-11-04', '2025-11-04');
+
+    expect(response.body.data.points).toEqual([{ date: '2025-11-04', average: 100, count: 2 }]);
+  });
+
+  it('returns no points when the range has no readings, and ignores other users', async () => {
+    const first = await registerAndGetCookie();
+    const second = await registerAndGetCookie({ email: 'other@example.com' });
+    await seed(second, [['2025-11-04', 'MORNING', 500]]);
+
+    const response = await getTrend(first, '2025-11-01', '2025-11-30');
+
+    expect(response.status).toBe(200);
+    expect(response.body.data.points).toEqual([]);
   });
 });

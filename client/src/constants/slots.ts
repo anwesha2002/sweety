@@ -8,6 +8,14 @@ export const SLOT_LABELS: Record<ReadingSlot, string> = {
   AFTER_DINNER: 'After dinner',
 };
 
+/** Short names for places with little room, such as chart axes. */
+export const SLOT_SHORT_LABELS: Record<ReadingSlot, string> = {
+  MORNING: 'Morning',
+  AFTER_BREAKFAST: 'Breakfast',
+  AFTER_LUNCH: 'Lunch',
+  AFTER_DINNER: 'Dinner',
+};
+
 /** Slots in the order they happen during the day. */
 export const SLOT_ORDER: ReadingSlot[] = [
   'MORNING',

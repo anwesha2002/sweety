@@ -26,3 +26,17 @@ export interface MonthlyReport {
   to: string;
   summary: ReportSummary;
 }
+
+/** One chart point: the average of all readings on one day. */
+export interface TrendPoint {
+  date: string; // YYYY-MM-DD
+  average: number; // rounded to 1 decimal by the server
+  count: number; // readings that day
+}
+
+/** Daily averages from `from` to `to`. Days without readings are left out. */
+export interface TrendReport {
+  from: string;
+  to: string;
+  points: TrendPoint[];
+}

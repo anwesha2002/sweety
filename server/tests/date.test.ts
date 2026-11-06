@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   addDays,
+  daysBetween,
   formatUtcDate,
   isValidDateString,
   maxAllowedDate,
@@ -70,6 +71,22 @@ describe('addDays', () => {
     expect(addDays('2024-02-28', 1)).toBe('2024-02-29');
     expect(addDays('2024-02-29', 1)).toBe('2024-03-01');
     expect(addDays('2025-02-28', 1)).toBe('2025-03-01');
+  });
+});
+
+describe('daysBetween', () => {
+  it('counts the days from one date to another', () => {
+    expect(daysBetween('2026-11-01', '2026-11-04')).toBe(3);
+    expect(daysBetween('2026-11-04', '2026-11-04')).toBe(0);
+    expect(daysBetween('2026-11-04', '2026-11-01')).toBe(-3);
+  });
+
+  it('handles month ends, years and leap days', () => {
+    expect(daysBetween('2026-11-30', '2026-12-01')).toBe(1);
+    expect(daysBetween('2025-12-31', '2026-01-01')).toBe(1);
+    expect(daysBetween('2024-02-28', '2024-03-01')).toBe(2);
+    expect(daysBetween('2025-02-28', '2025-03-01')).toBe(1);
+    expect(daysBetween('2024-01-01', '2024-12-31')).toBe(365);
   });
 });
 
