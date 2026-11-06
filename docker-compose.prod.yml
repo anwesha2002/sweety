@@ -1,0 +1,59 @@
+# Production stack: browser -> web (nginx + built React app) -> server (Express API) -> postgres.
+#
+#   cp .env.production.example .env.production      # fill in the secrets
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+#
+# Only the web container is reachable from outside (port WEB_PORT, default 8080). The API and
+# the database have no published ports. Put a TLS-terminating proxy (or your platform's load
+# balancer) in front of "web" and serve the site over HTTPS: the auth cookie is `Secure`.
+name: sweety-prod
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sweety}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+      POSTGRES_DB: ${POSTGRES_DB:-sweety}
+    volumes:
+      - sweety_prod_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sweety}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-sweety}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET (32+ characters) in .env.production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      CLIENT_URL: ${PUBLIC_URL:?Set PUBLIC_URL (the address users open) in .env.production}
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-12}
+      # Number of proxies between the browser and the API: nginx is 1; add one for a platform
+      # load balancer / TLS proxy in front of nginx. Needed for correct client IPs (rate limiting).
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+
+  web:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+    ports:
+      - '${WEB_PORT:-8080}:80'
+
+volumes:
+  sweety_prod_pgdata:

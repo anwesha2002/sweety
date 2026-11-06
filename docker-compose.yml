@@ -1,0 +1,27 @@
+# Development database: PostgreSQL for local work (`npm run dev` runs the app itself on your machine).
+# Creates two databases: "sweety" (dev) and "sweety_test" (backend tests).
+# Host port 5434 avoids clashing with a PostgreSQL on 5432 and with other projects' databases
+# that commonly use 5433.
+# The production stack (app + database) is in docker-compose.prod.yml.
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: sweety-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sweety
+      POSTGRES_PASSWORD: sweety
+      POSTGRES_DB: sweety
+    ports:
+      - '5434:5432'
+    volumes:
+      - sweety_pgdata:/var/lib/postgresql/data
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sweety -d sweety']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  sweety_pgdata:

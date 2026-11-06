@@ -1,0 +1,21 @@
+# Keep the build context small and keep secrets out of the images.
+**/node_modules
+**/dist
+**/coverage
+**/*.log
+.git
+.idea
+.vscode
+
+# Environment files (real secrets); only the examples are harmless
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.test.example
+!**/.env.production.example
+
+# Not needed to build the apps
+docs
+docker
+docker-compose*.yml
+README.md
