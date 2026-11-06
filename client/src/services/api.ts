@@ -1,8 +1,12 @@
 import axios from 'axios';
 
-/** One shared Axios instance. Cookies (the JWT) are sent automatically by the browser. */
+/**
+ * One shared Axios instance. Cookies (the JWT) are sent automatically by the browser.
+ * `||`, not `??`: a hosting dashboard can define VITE_API_URL as an empty string, and an
+ * empty base URL would send requests to `/auth/login` instead of `/api/v1/auth/login`.
+ */
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || '/api/v1',
   withCredentials: true,
 });
 
