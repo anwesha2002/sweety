@@ -135,3 +135,9 @@ Request and response examples: [docs/api.md](docs/api.md).
 - **Reports and dates.** Report endpoints accept any valid date (a future date gives an empty report); the UI limits the picker to today. The dashboard reuses the report endpoints (today's daily report for the slot cards, month-to-date for the stat cards).
 - **Rate limiting** applies to register and login only (10 requests per 15 minutes per IP) and is off when `NODE_ENV=test`. `TRUST_PROXY` must be set when running behind a reverse proxy so client IPs and secure cookies work.
 - **Client/server schema duplication.** The client and server each own a copy of the Zod auth rules (and slot labels) so the apps stay independent; comments mark the pairs that must stay in sync.
+
+
+## Future scope
+
+- Redis for caching
+- Doctor's role admin dashboard
