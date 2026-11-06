@@ -16,7 +16,7 @@ Sweety is a blood glucose tracking app: a diabetes patient records up to 4 readi
 
 ## What is NOT implemented
 
-- Charts, CSV export, refresh tokens and password reset (bonus items).
+- Charts (a simple chart is implemented), CSV export, refresh tokens and password reset (bonus items).
 - Doctor/patient roles (out of scope).
 
 Request and response examples for every endpoint: [docs/api.md](docs/api.md).
