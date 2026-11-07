@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" width="1280" height="400" role="img" aria-labelledby="t d" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <title id="t">Sweety API request flow</title>
+  <desc id="d">A request passes through global middleware, rate limiting, Zod validation and JWT authentication, then a controller, service and repository down to PostgreSQL. Errors at any step go to one central error handler.</desc>
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#334155"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#e11d48"/>
+    </marker>
+  </defs>
+
+  <rect x="1" y="1" width="1278" height="398" rx="22" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+
+  <text x="40" y="54" font-size="24" font-weight="700" fill="#0f172a">Sweety · Request flow inside the API</text>
+  <text x="40" y="79" font-size="14" fill="#64748b">Every request to /api/v1 takes the same path. Only the repository talks to the database. Dashed lines show where errors go.</text>
+
+  <!-- group labels -->
+  <rect x="40" y="104" width="606" height="26" rx="13" fill="#f1f5f9"/>
+  <text x="343" y="122" font-size="12" font-weight="700" letter-spacing="1" fill="#475569" text-anchor="middle">EXPRESS MIDDLEWARE</text>
+  <rect x="670" y="104" width="454" height="26" rx="13" fill="#ecfdf5"/>
+  <text x="897" y="122" font-size="12" font-weight="700" letter-spacing="1" fill="#047857" text-anchor="middle">FEATURE MODULE (AUTH · READINGS · REPORTS)</text>
+  <rect x="1148" y="104" width="92" height="26" rx="13" fill="#eef2ff"/>
+  <text x="1194" y="122" font-size="12" font-weight="700" letter-spacing="1" fill="#4338ca" text-anchor="middle">DATABASE</text>
+
+  <!-- cards: w=140 h=110 y=146, step 152 starting x=40 -->
+  <g filter="url(#shadow)">
+    <rect x="40"   y="146" width="140" height="110" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="192"  y="146" width="140" height="110" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="344"  y="146" width="140" height="110" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="496"  y="146" width="150" height="110" rx="14" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="670"  y="146" width="140" height="110" rx="14" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
+    <rect x="822"  y="146" width="140" height="110" rx="14" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
+    <rect x="974"  y="146" width="150" height="110" rx="14" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.5"/>
+    <rect x="1148" y="146" width="92"  height="110" rx="14" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.5"/>
+  </g>
+
+  <!-- step numbers -->
+  <g font-size="12" font-weight="700" fill="#ffffff" text-anchor="middle">
+    <circle cx="62"   cy="168" r="11" fill="#64748b"/><text x="62"   y="172">1</text>
+    <circle cx="214"  cy="168" r="11" fill="#64748b"/><text x="214"  y="172">2</text>
+    <circle cx="366"  cy="168" r="11" fill="#64748b"/><text x="366"  y="172">3</text>
+    <circle cx="518"  cy="168" r="11" fill="#64748b"/><text x="518"  y="172">4</text>
+    <circle cx="692"  cy="168" r="11" fill="#10b981"/><text x="692"  y="172">5</text>
+    <circle cx="844"  cy="168" r="11" fill="#10b981"/><text x="844"  y="172">6</text>
+    <circle cx="996"  cy="168" r="11" fill="#10b981"/><text x="996"  y="172">7</text>
+    <circle cx="1170" cy="168" r="11" fill="#6366f1"/><text x="1170" y="172">8</text>
+  </g>
+
+  <!-- card text -->
+  <g fill="#0f172a" font-size="14" font-weight="700">
+    <text x="56"   y="204">Middleware</text>
+    <text x="208"  y="204">Rate limiter</text>
+    <text x="360"  y="204">validate()</text>
+    <text x="512"  y="204">requireAuth</text>
+    <text x="686"  y="204">Controller</text>
+    <text x="838"  y="204">Service</text>
+    <text x="990"  y="204">Repository</text>
+    <text x="1164" y="204">Postgres</text>
+  </g>
+  <g fill="#64748b" font-size="11.5">
+    <text x="56"  y="224">pino-http, Helmet,</text><text x="56" y="240">CORS, JSON body</text>
+    <text x="208" y="224">Register and login</text><text x="208" y="240">only (10 per 15 min)</text>
+    <text x="360" y="224">Zod checks body,</text><text x="360" y="240">query and params</text>
+    <text x="512" y="224">Verifies the JWT</text><text x="512" y="240">cookie, loads user</text>
+    <text x="686" y="224">Reads the request,</text><text x="686" y="240">sends the response</text>
+    <text x="838" y="224">Business rules</text><text x="838" y="240">(limits, dates)</text>
+    <text x="990" y="224">The only layer that</text><text x="990" y="240">queries the database</text>
+    <text x="1164" y="224">Drizzle</text><text x="1164" y="240">ORM</text>
+  </g>
+
+  <!-- forward arrows -->
+  <g stroke="#334155" stroke-width="2.2" fill="none" marker-end="url(#arrow)">
+    <path d="M181 201 H190"/>
+    <path d="M333 201 H342"/>
+    <path d="M485 201 H494"/>
+    <path d="M647 201 H668"/>
+    <path d="M811 201 H820"/>
+    <path d="M963 201 H972"/>
+    <path d="M1125 201 H1146"/>
+  </g>
+
+
+  <!-- error paths -->
+  <g stroke="#e11d48" stroke-width="1.8" stroke-dasharray="5 4" fill="none" marker-end="url(#arrowRed)">
+    <path d="M414 258 V330"/>
+    <path d="M571 258 V330"/>
+    <path d="M898 258 V330"/>
+  </g>
+  <rect x="40" y="332" width="1200" height="44" rx="12" fill="#fff1f2" stroke="#fda4af" stroke-width="1.5"/>
+  <text x="64" y="359" font-size="14" font-weight="700" fill="#9f1239">Central error handler</text>
+  <text x="240" y="359" font-size="13" fill="#be123c">Validation, auth, business-rule and 404 errors all end here and return one JSON format:</text>
+  <text x="868" y="359" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" fill="#9f1239">{ success: false, message, errors[] }</text>
+</svg>

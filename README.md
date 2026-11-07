@@ -95,51 +95,17 @@ Also not implemented: CSV export, refresh tokens, password reset.
 
 ### Deployment
 
-```mermaid
-flowchart LR
-    U["User's browser"]
-
-    subgraph Vercel["Vercel"]
-        FE["React app<br/>(static build)"]
-        RW["Rewrite rule<br/>/api/* to Render"]
-    end
-
-    subgraph Render["Render (free plan)"]
-        API["Express API<br/>Docker container"]
-    end
-
-    subgraph Neon["Neon"]
-        DB[("PostgreSQL")]
-    end
-
-    U -- "pages, JS, CSS" --> FE
-    U -- "/api/v1/... + auth cookie" --> RW
-    RW -- "HTTPS" --> API
-    API -- "SQL (Drizzle ORM)" --> DB
-```
+<p align="center">
+  <img src="docs/architecture-deployment.svg" alt="Deployment architecture: browser, Vercel (React app and /api rewrite), Render (Express API), Neon (PostgreSQL)" width="100%" />
+</p>
 
 The browser only ever talks to the Vercel domain. Vercel forwards every `/api/*` request to Render (see [`client/vercel.json`](client/vercel.json)), so the frontend and API share one origin. That keeps the `SameSite=Lax` auth cookie working without CORS or CSRF tokens.
 
 ### Request flow inside the API
 
-```mermaid
-flowchart TD
-    REQ["Incoming request"] --> MW["Global middleware<br/>pino-http, Helmet, CORS, JSON body (100kb), cookie-parser"]
-    MW --> ROUTER["/api/v1 router"]
-    ROUTER --> RL["Rate limiter<br/>(register and login only)"]
-    RL --> VAL["validate()<br/>Zod: body, query, params"]
-    VAL --> AUTH["requireAuth<br/>verify JWT cookie, load user"]
-    AUTH --> CTRL["Controller<br/>reads request, sends response"]
-    CTRL --> SVC["Service<br/>business rules"]
-    SVC --> REPO["Repository<br/>only layer that queries the database"]
-    REPO --> DB[("PostgreSQL")]
-
-    ROUTER -. "unknown path" .-> NF["404 handler"]
-    VAL -. "error" .-> ERR["Central error handler<br/>one JSON error format"]
-    AUTH -. "error" .-> ERR
-    SVC -. "error" .-> ERR
-    NF --> ERR
-```
+<p align="center">
+  <img src="docs/architecture-request-flow.svg" alt="API request flow: middleware, rate limiter, validation, auth, controller, service, repository, PostgreSQL, with errors going to one central handler" width="100%" />
+</p>
 
 Each feature (`auth`, `users`, `readings`, `reports`, `health`) is a module with its own routes, controller, service and repository. More detail, including the authentication flow, date convention and error format: [docs/architecture.md](docs/architecture.md).
 
